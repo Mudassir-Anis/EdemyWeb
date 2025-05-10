@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import { Purchase } from "../models/Purchase.js";
 import Stripe from "stripe";
 import Course from "../models/Course.js";
+import { CourseProgress } from "../models/courseProgress.js";
 
 export const getUserData = async (req, res) => {
   try {
@@ -88,7 +89,7 @@ export const purchaseCourse = async (req, res) => {
     ];
 
     const session = await stripeInstance.checkout.sessions.create({
-      success_url: `${origin}/loading/my-enrollments`,
+      success_url: `${origin}/loading/my-enrolments`,
       cancel_url: `${origin}/`,
       line_items: line_items,
       mode: "payment",
@@ -134,36 +135,31 @@ export const updateUserCourseProgress = async (req, res) => {
   }
 };
 
-
-
-
 // Get User Course Progress
 export const getUserCourseProgress = async (req, res) => {
   try {
-      const userId = req.auth.userId;
-      const { courseId } = req.body;
-      const progressData = await CourseProgress.findOne({ userId, courseId });
-      
-      if (!progressData) {
-          return res.json({ 
-              success: false, 
-              message: 'Progress data not found' 
-          });
-      }
+    const userId = req.auth.userId;
+    const { courseId } = req.body;
+    const progressData = await CourseProgress.findOne({ userId , courseId });
 
-      res.json({ 
-          success: true, 
-          progressData 
+    if (!progressData) {
+      return res.json({
+        success: false,
+        message: "Progress data not found",
       });
+    }
+
+    res.json({
+      success: true,
+      progressData,
+    });
   } catch (error) {
-      res.status(500).json({ 
-          success: false, 
-          message: error.message 
-      });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
-
-
 
 // Add User Ratings to Course
 export const addUserRating = async (req, res) => {
